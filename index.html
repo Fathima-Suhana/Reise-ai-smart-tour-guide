@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reise: Your AI Smart Tour Guide</title>
+<style>
+:root{--bg:#F5F4F7;--card:#fff;--tx:#1F1F1F;--mute:#8F917C;--ac:#BAC8E0;--ac2:#EBDBD3;--bd:#E4DFE6;--water:#BAC8E0;--land:#D0BEA3;--mbg:#EBDBD3;--mroad:#fff;--mcase:#D8C9BC;--mmaj:#D0BEA3;--mpark:#B7BAA5;--mwater:#BAC8E0;--warn:#8F917C;--p1:#EBDBD3;--p2:#BAC8E0;--p3:#D0BEA3;--p4:#DCDDD1;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--mbg:#2a2a2c;--mroad:#3c3c40;--mcase:#1F1F1F;--mmaj:#6b6048;--mpark:#4a4d3e;--mwater:#3b4a63;--bg:#1F1F1F;--card:#2a2a2c;--tx:#F5F4F7;--mute:#A9AB98;--ac:#BAC8E0;--ac2:#343437;--bd:#3a3a3d;--water:#3b4a63;--land:#4a4a3c;--warn:#D0BEA3;--p1:#3b3330;--p2:#2f3a4d;--p3:#4a4234;--p4:#3a3b33}}
+:root[data-theme="dark"]{--mbg:#2a2a2c;--mroad:#3c3c40;--mcase:#1F1F1F;--mmaj:#6b6048;--mpark:#4a4d3e;--mwater:#3b4a63;--bg:#1F1F1F;--card:#2a2a2c;--tx:#F5F4F7;--mute:#A9AB98;--ac:#BAC8E0;--ac2:#343437;--bd:#3a3a3d;--water:#3b4a63;--land:#4a4a3c;--warn:#D0BEA3;--p1:#3b3330;--p2:#2f3a4d;--p3:#4a4234;--p4:#3a3b33}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:linear-gradient(160deg,var(--bg),var(--ac2)) fixed;color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:0 0 2px}h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin:0 0 10px}
+.sub{color:var(--mute);margin:0 0 16px}
+.grid{display:grid;gap:14px;grid-template-columns:1fr}
+@media(min-width:800px){.grid{grid-template-columns:340px 1fr}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:14px;box-shadow:0 6px 18px rgba(150,130,200,.12)}.facts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.fb{border-radius:12px;padding:8px 10px;font-size:12.5px;color:var(--mute)}.fb b{display:block;font-size:14px;color:var(--tx)}.wp circle{fill:var(--warn);stroke:#fff;stroke-width:.3;cursor:pointer}.wp.on circle{fill:var(--ac);stroke:var(--tx)}.wp text{font-size:1.7px;fill:var(--tx);paint-order:stroke;stroke:var(--card);stroke-width:.4px;cursor:pointer}input[type=range]{accent-color:var(--ac)}.nb{display:flex;gap:12px;align-items:center;background:var(--p4);border-radius:14px;padding:10px 12px;margin:8px 0}.nb .ic{font-size:30px;line-height:1;width:40px;text-align:center}.nb b{font-size:17px}.btnp{border:0;background:var(--ac);color:#2a2440;font:inherit;font-weight:700;padding:8px 14px;border-radius:12px;cursor:pointer}#nsteps{max-height:210px;overflow:auto}.stopitem.act{background:var(--ac2);border-radius:10px;padding-left:6px}
+label{display:block;font-size:13px;color:var(--mute);margin:10px 0 4px}
+select,input[type=range]{width:100%}
+select{padding:8px;border-radius:8px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:6px 12px;border-radius:99px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);cursor:pointer;font:inherit;font-size:13px}
+.chip.on{background:var(--ac);color:#2a2440;border-color:var(--ac)}
+svg{width:100%;height:auto;display:block;border-radius:10px;background:var(--bg)}
+.pin{cursor:pointer}.pin circle{fill:var(--mute);stroke:var(--card);stroke-width:.6}
+.pin.stop circle{fill:var(--ac)}.pin.sel circle{stroke:var(--warn);stroke-width:1}
+.pin text{font-size:2.6px;fill:var(--tx);paint-order:stroke;stroke:var(--bg);stroke-width:.6px}
+.pin .n{fill:#2a2440;font-size:2.8px;font-weight:700;stroke:none;text-anchor:middle}
+.stopitem{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--bd)}
+.stopitem:first-child{border-top:0}
+.num{flex:none;width:26px;height:26px;border-radius:50%;background:var(--ac);color:#2a2440;display:grid;place-items:center;font-weight:700;font-size:13px}
+.stopitem .t{flex:1;cursor:pointer}.meta{color:var(--mute);font-size:12.5px}
+.x{border:0;background:none;color:var(--mute);cursor:pointer;font-size:18px;line-height:1}
+.sum{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px;font-size:13px}.sum b{font-size:17px;display:block}
+.info h3{margin:0 0 4px;font-size:17px}.fact{background:var(--ac2);border-radius:8px;padding:8px 10px;margin-top:8px;font-size:14px}
+.note{color:var(--warn);font-size:13px;margin-top:6px}
+.btn{border:1px solid var(--bd);background:var(--bg);color:var(--tx);padding:6px 10px;border-radius:8px;cursor:pointer;font:inherit;font-size:13px}
+.col{display:grid;gap:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🧭 Reise: Your AI Smart Tour Guide</h1>
+  <p class="sub">Pick a country, set your time and interests, and get an itinerary that adapts live.</p>
+  <div class="grid">
+    <div class="col">
+      <div class="card">
+        <h2>Your trip</h2>
+        <label for="ctry">Country</label>
+        <select id="ctry"></select>
+        <label for="start">Starting from</label>
+        <select id="start"></select>
+        <label for="hrs">Time available: <b id="hv"></b></label>
+        <input type="range" id="hrs" min="1" max="10" step="0.5" value="5">
+        <label for="t0">Start time</label>
+        <select id="t0"></select>
+        <label>Interests</label>
+        <div class="chips" id="chips"></div>
+      </div>
+      <div class="card info" id="info"></div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <h2>Interactive world map</h2>
+        <div class="chips" style="margin-bottom:8px"><button class="chip on" id="tw">🌍 World</button><button class="chip" id="tc">📍 City route</button><button class="chip" id="tn">🧭 Navigate</button></div>
+        <svg id="map" viewBox="0 0 200 100" role="img" aria-label="Map of attractions"></svg>
+        <div id="navp" style="display:none">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div><label for="nf">From</label><select id="nf"></select></div><div><label for="nt">To</label><select id="nt"></select></div></div>
+          <div class="chips" style="margin:10px 0"><button class="chip on" id="nm1">🚶 Walk</button><button class="chip" id="nm2">🚗 Drive</button><button class="btnp" id="ngo">▶ Start</button><button class="btn" id="nall">Demo my plan</button><button class="btn" id="ndemo">🎬 Demo</button></div>
+          <div class="meta" id="ngm"></div>
+          <div id="nsum" style="margin:6px 0"></div>
+          <div class="nb"><div class="ic" id="nic">🧭</div><div><b id="ntx"></b><div class="meta" id="nsub"></div></div></div>
+          <div id="nsteps"></div>
+          <div class="meta" style="margin-top:6px">Start follows your real GPS position: the arrow moves only when you walk or drive. Demo plays a sped-up preview.</div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Dynamic itinerary</h2>
+        <div class="sum" id="sum"></div>
+        <div id="list"></div>
+        <div class="note" id="note"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+// Attraction database (Module 3 content). x/y are schematic map coordinates.
+var DB={};
+var CITY={France:"Paris",India:"Delhi",Italy:"Rome",Japan:"Tokyo",UK:"London"};
+DB.France=[
+{id:0,n:"Eiffel Tower",x:26,y:48,d:90,w:3,tags:["landmark","history"],h:"Built by Gustave Eiffel’s company for the 1889 World’s Fair, it was meant to stand for only 20 years.",f:"The iron structure grows about 15 cm taller in summer heat."},
+{id:1,n:"Louvre Museum",x:50,y:38,d:150,w:3,tags:["art","history"],h:"A medieval fortress turned royal palace, opened as a public museum in 1793.",f:"Seeing every artwork for 30 seconds each would take about 200 days."},
+{id:2,n:"Notre-Dame",x:58,y:50,d:60,w:3,tags:["history","landmark"],h:"Gothic cathedral begun in 1163 on the Île de la Cité, the heart of medieval Paris.",f:"Distances from Paris are measured from a marker in front of it."},
+{id:3,n:"Arc de Triomphe",x:15,y:30,d:45,w:2,tags:["landmark","history"],h:"Commissioned by Napoleon in 1806 to honour his armies; completed in 1836.",f:"Twelve avenues radiate from the square around it."},
+{id:4,n:"Sacré-Cœur",x:60,y:9,d:75,w:2,tags:["history","landmark","nature"],h:"Basilica on Montmartre hill, consecrated in 1919 and visible across the city.",f:"Its dome offers one of the highest viewpoints in Paris."},
+{id:5,n:"Musée d’Orsay",x:44,y:49,d:120,w:2,tags:["art","history"],h:"Housed in a former railway station from 1900, now home to Impressionist masterpieces.",f:"Its giant station clock doubles as a museum window."},
+{id:6,n:"Luxembourg Gardens",x:50,y:66,d:60,w:2,tags:["nature"],h:"Created in 1612 for Marie de’ Medici beside the Luxembourg Palace.",f:"Children have sailed toy boats on its pond for generations."},
+{id:7,n:"Palais Garnier",x:48,y:30,d:60,w:2,tags:["art","landmark"],h:"Opulent opera house completed in 1875, famous as the setting of The Phantom of the Opera.",f:"It reportedly has an underground lake beneath the stage."},
+{id:8,n:"Père Lachaise",x:84,y:40,d:90,w:1,tags:["history","nature"],h:"Opened in 1804, it is among the most visited cemeteries in the world.",f:"Notable artists, writers and musicians are buried here."},
+{id:9,n:"Tuileries Garden",x:42,y:40,d:45,w:1,tags:["nature","art"],h:"Laid out in 1564 for a royal palace that no longer exists.",f:"It links the Louvre to Place de la Concorde."}
+];
+DB.India=[
+{id:0,n:"Red Fort",x:60,y:25,d:120,w:3,tags:["history","landmark"],h:"Mughal fortress built by Shah Jahan between 1639 and 1648 as the seat of the empire.",f:"The Prime Minister raises the national flag here every Independence Day."},
+{id:1,n:"India Gate",x:45,y:48,d:45,w:3,tags:["landmark","history"],h:"A 42 m war memorial designed by Edwin Lutyens and completed in 1931.",f:"It is inscribed with the names of tens of thousands of soldiers."},
+{id:2,n:"Qutub Minar",x:28,y:68,d:75,w:3,tags:["history","landmark"],h:"A 73 m minaret begun in 1193, among the tallest brick minarets in the world.",f:"A nearby iron pillar has resisted rust for about 1,600 years."},
+{id:3,n:"Humayun’s Tomb",x:64,y:55,d:60,w:2,tags:["history","art"],h:"Built in the 1560s, the first garden-tomb on the Indian subcontinent.",f:"Its design later inspired the Taj Mahal."},
+{id:4,n:"Lotus Temple",x:72,y:72,d:45,w:2,tags:["landmark","art"],h:"Bahá’í house of worship completed in 1986, shaped like a lotus flower.",f:"It has 27 marble-clad petals."},
+{id:5,n:"Lodhi Garden",x:48,y:58,d:60,w:1,tags:["nature","history"],h:"Park surrounding 15th-century tombs of the Sayyid and Lodhi dynasties.",f:"Locals gather here for morning walks and yoga."}
+];
+DB.Italy=[
+{id:0,n:"Colosseum",x:60,y:50,d:90,w:3,tags:["history","landmark"],h:"Amphitheatre opened in AD 80, hosting gladiator contests for tens of thousands.",f:"A retractable awning once shaded the crowd."},
+{id:1,n:"Roman Forum",x:52,y:44,d:75,w:3,tags:["history"],h:"The centre of public life in ancient Rome, with temples and basilicas.",f:"Julius Caesar’s funeral took place here."},
+{id:2,n:"Pantheon",x:38,y:30,d:40,w:3,tags:["history","landmark","art"],h:"Temple rebuilt by Emperor Hadrian around AD 126, now a church.",f:"Its dome is still the largest unreinforced concrete dome."},
+{id:3,n:"Trevi Fountain",x:50,y:24,d:30,w:2,tags:["art","landmark"],h:"Baroque fountain completed in 1762 and fed by an ancient aqueduct.",f:"Coins tossed in are collected for charity."},
+{id:4,n:"Vatican Museums",x:14,y:28,d:150,w:3,tags:["art","history"],h:"Collections grown from the early 1500s, ending in the Sistine Chapel.",f:"Michelangelo painted the chapel ceiling between 1508 and 1512."},
+{id:5,n:"Villa Borghese",x:62,y:8,d:90,w:1,tags:["nature","art"],h:"Landscaped park laid out by Cardinal Scipione Borghese in the 1600s.",f:"Its gallery houses sculptures by Bernini."}
+];
+DB.Japan=[
+{id:0,n:"Senso-ji",x:72,y:22,d:75,w:3,tags:["history","landmark"],h:"Tokyo’s oldest temple, founded in 645 in Asakusa.",f:"Its Kaminarimon gate hangs a giant red lantern."},
+{id:1,n:"Meiji Shrine",x:22,y:45,d:75,w:3,tags:["history","nature"],h:"Shinto shrine completed in 1920, dedicated to Emperor Meiji.",f:"Its forest was planted with about 100,000 donated trees."},
+{id:2,n:"Tokyo Skytree",x:82,y:30,d:60,w:2,tags:["landmark"],h:"A 634 m broadcasting tower that opened in 2012.",f:"It is the tallest tower in the world."},
+{id:3,n:"Shibuya Crossing",x:20,y:60,d:30,w:2,tags:["landmark"],h:"The famous scramble intersection outside Shibuya Station.",f:"Thousands of people can cross in a single signal change."},
+{id:4,n:"Ueno Park",x:66,y:10,d:90,w:2,tags:["nature","art"],h:"Opened in 1873 as one of Japan’s first public parks.",f:"It is a top spot for cherry blossoms and holds several museums."},
+{id:5,n:"Imperial Palace Gardens",x:50,y:42,d:75,w:2,tags:["history","nature"],h:"Former site of Edo Castle, seat of the Tokugawa shoguns.",f:"Massive stone walls of the old castle still remain."}
+];
+DB.UK=[
+{id:0,n:"Tower of London",x:78,y:42,d:120,w:3,tags:["history","landmark"],h:"Fortress begun by William the Conqueror around 1078.",f:"Ravens are kept here by tradition."},
+{id:1,n:"British Museum",x:46,y:18,d:150,w:3,tags:["art","history"],h:"Founded in 1753 and opened to the public in 1759.",f:"It holds the Rosetta Stone."},
+{id:2,n:"Buckingham Palace",x:28,y:50,d:45,w:3,tags:["landmark","history"],h:"Became the monarch’s London residence in 1837 under Queen Victoria.",f:"The Changing of the Guard draws crowds outside."},
+{id:3,n:"Westminster Abbey",x:40,y:60,d:60,w:2,tags:["history","landmark"],h:"Coronation church of English monarchs since 1066.",f:"Many monarchs and famous figures are buried here."},
+{id:4,n:"Hyde Park",x:16,y:36,d:75,w:1,tags:["nature"],h:"Former royal hunting ground opened to the public in 1637.",f:"Speakers’ Corner has hosted open debate for generations."},
+{id:5,n:"Tate Modern",x:60,y:50,d:90,w:2,tags:["art"],h:"Modern art museum in a former power station, opened in 2000.",f:"Its huge Turbine Hall hosts large installations."}
+];
+var CUR={France:"€",India:"₹",Italy:"€",Japan:"¥",UK:"£"};
+var GEO={France:[101.5,22.8],India:[142.8,34.1],Italy:[107,26.7],Japan:[177.6,30.2],UK:[100,21.4]};
+var LAND=["M6.7 13.3L22.2 11.1L47.2 10L55.6 12.2L65.6 16.7L69.4 22.2L62.8 25L57.8 30L55 36.1L46.1 35.6L46.1 40L51.1 41.1L56.7 45.6L48.9 42.2L41.1 37.8L34.4 32.2L30.6 26.7L30.6 22.2L22.2 16.7L13.9 17.8Z","M59.4 6.7L88.9 4.4L88.9 11.1L75 16.7L66.7 11.1Z","M56.7 45.6L66.7 44.4L72.2 50L80.6 53.3L77.8 62.2L67.8 71.1L62.2 80L58.3 76.7L60 66.7L61.1 60L55 52.8L55.6 51.1Z","M94.4 30.6L105.6 29.4L117.8 32.8L123.9 43.3L128.3 43.3L122.2 51.1L122.2 58.3L119.4 63.9L111.1 69.4L107.8 62.2L106.7 52.8L104.4 47.8L95.6 47.8L90.6 43.3L90.6 38.3Z","M95 28.9L98.9 25.6L97.2 23.3L102.8 21.1L104.4 18.9L102.8 15.6L108.3 11.7L116.7 10.6L133.3 11.7L155.6 7.2L177.8 10L194.4 11.7L200 13.9L188.9 16.7L179 21.1L175 26.1L170 30.6L167.8 33.3L166.7 37.2L160 38.3L158.9 44.4L155.6 42.8L157.8 49.4L154.4 45.6L151 37.8L144.4 44.4L140.6 38.9L136.7 36.1L131.7 37.2L123.9 42.8L119.4 34.4L118.3 32.8L120 30L115.6 29.4L114.4 27.8L112.2 29.4L110.6 26.7L106.7 25L108.9 27.8L104.4 25.6L101.7 26.1L99.4 29.4Z","M163.3 62.2L172.2 56.7L178.9 56.1L185 64.4L181 71.7L172.2 67.8L163.9 68.9Z","M172.8 32L176 31L179 27L180 25.5L178 30.5L174 33.5Z","M97.2 22.2L100.6 21.7L99.4 19.4L97.8 17.8L96.7 20Z"];
+// Typical opening hour, closing hour, crowd level 1-4, entry fee (local currency; India shows Indian-citizen rates)
+var INFO={France:[[9,23,4,36],[9,18,4,22],[8,19,4,0],[10,23,3,16],[6,22.5,3,0],[9.5,18,3,16],[7.5,21,2,0],[10,17,2,15],[8,18,1,0],[7,21,2,0]],India:[[9.5,16.5,3,35],[0,24,4,0],[7,17,3,35],[6,18,2,35],[9,17,3,0],[6,20,1,0]],Italy:[[9,19,4,18],[9,19,3,18],[9,19,4,5],[0,24,4,0],[8,18,4,20],[7,20,2,0]],Japan:[[6,17,4,0],[5,18,3,0],[10,21,3,2100],[0,24,3,0],[5,23,2,0],[9,16.5,2,0]],UK:[[9,17.5,4,35],[10,17,3,0],[9.5,17,3,33],[9.5,15.5,3,30],[5,24,2,0],[10,18,2,0]]};
+Object.keys(INFO).forEach(function(c){INFO[c].forEach(function(a,i){var p=DB[c][i];p.o=a[0]*60;p.z=a[1]*60;p.cr=a[2];p.fee=a[3]})});
+var CROWD=["","🟢 Low crowd","🟡 Moderate","🟠 Busy","🔴 Very busy"];
+var MORE={
+France:["Take the lift or climb the stairs to the first and second floors for sweeping views over the Seine. The tower sparkles for five minutes at the top of every hour after dark. Book timed tickets ahead to skip long queues.","Head for the Mona Lisa, the Venus de Milo and the Winged Victory of Samothrace, then explore the Egyptian and Islamic art wings. The glass pyramid entrance was added in 1989. A weekday evening is usually the quietest time.","Look up at the twin towers, the rose windows and the gargoyles on the façade. The cathedral has reopened after the 2019 fire. The square outside is a good spot to take in the Seine’s islands.","Climb the stairs to the rooftop terrace for a view down the Champs-Élysées. The Tomb of the Unknown Soldier lies beneath the arch, with a flame rekindled every evening. Use the underground passage to reach it, not the roundabout.","Climb the steps or take the funicular, then enjoy views over the whole city from the front terrace. Inside, a golden mosaic fills the apse. The nearby streets of Montmartre are full of artists’ squares and cafés.","See Monet, Renoir, Degas, Van Gogh and Cézanne in the old station’s grand hall. The café behind the big clock has a lovely view. Thursday evenings are usually quieter.","Rent a chair by the central pond, watch the boules players and visit the orchard and the Medici Fountain. It is a calm break between museum visits.","Walk up the grand marble staircase and look up at the ceiling painted by Marc Chagall in the auditorium. The gilded foyer is just as lavish as the stage.","Pick up a map at the entrance to find the graves of Oscar Wilde, Jim Morrison and Édith Piaf. The shaded paths make for a long, peaceful stroll.","Stroll between fountains and statues from the Louvre toward the Place de la Concorde. In summer a small funfair and refreshment kiosks open here."],
+India:["Enter through the Lahori Gate and walk the covered Chhatta Chowk bazaar. Inside, see the Diwan-i-Aam and the small museums. A light-and-sound show runs in the evening.","The lawns and the broad avenue nearby are popular for evening walks and ice cream. The memorial is lit up after dark. Arrive near sunset for the best light.","Look closely at the carved verses on the tower and walk around the ruined mosque and the famous Iron Pillar. Early mornings are cooler and calmer.","Wander the symmetrical Charbagh gardens and the tombs of the Mughal court inside. The red sandstone and white marble look best in late afternoon light.","Sit quietly in the central hall, where photography is not allowed. Walk the pools and gardens around the petals before you go in. The temple is closed on Mondays.","Follow the paths between the Bara Gumbad, the Shisha Gumbad and the tombs, and look for birds around the pond. It is a green escape from the city’s traffic."],
+Italy:["Book a ticket that includes the arena floor and the underground chambers where gladiators and animals waited. Combined tickets also cover the Forum and Palatine Hill. Go at opening time to beat the heat and queues.","Walk the Via Sacra past the Arch of Titus, the Temple of Saturn and the Senate House. A good audio guide helps make sense of the ruins. Wear comfortable shoes for the uneven stones.","Stand beneath the oculus, the circular opening in the dome, and watch the beam of light move across the floor. The painter Raphael is buried here. Go early to avoid queues.","Toss a coin over your left shoulder with your right hand for a wish to return to Rome. Visit very early or late at night for space to enjoy the sculptures. Watch for pickpockets in the crowd.","Follow the route through the galleries to the Raphael Rooms and finish in the Sistine Chapel. Silence is requested in the chapel and photos are not allowed. Book timed tickets online.","Rent a bike or a rowboat on the little lake and see the Temple of Aesculapius. The Galleria Borghese inside needs a separate reservation."],
+Japan:["Walk down the Nakamise shopping street from the Kaminarimon gate to the main hall. Waft incense smoke over yourself for good health and try the omikuji fortune slips. Go early for fewer crowds.","Pass beneath the huge torii gate and walk the gravel path through the forest. You may see a Shinto wedding procession on weekends. Write a wish on a wooden ema plaque.","Ride the lift to the Tembo Deck and, on a clear day, see as far as Mount Fuji. The Solamachi mall at its base has shops and an aquarium. Book tickets online for sunset.","Watch the crossing from a café window or the Shibuya Sky observation deck. Meet at the statue of the dog Hachiko outside the station. Evenings are the busiest and most colourful.","Visit the Tokyo National Museum, the zoo and Shinobazu Pond among the lotus and cherry trees. Spring weekends are packed with picnic parties under the blossoms.","Walk the stone walls and old guardhouses toward the foundations of the main keep. Entry is free but the gardens close on some days, so check the calendar. Seasonal flowers fill the grounds."],
+UK:["See the Crown Jewels, the White Tower and the armour collection. Yeoman Warders, known as Beefeaters, lead entertaining tours. Arrive at opening to see the jewels before the queues build.","See the Rosetta Stone, the Parthenon sculptures and the Egyptian mummies. The Great Court’s glass roof is worth a look. Entry is free but busy, so pick a few galleries.","Watch the Changing of the Guard on scheduled days. In summer the State Rooms open to visitors. Stand early near the gates for a good view.","Walk the nave to Poets’ Corner and the Coronation Chair, and look up at the fan vaulting of the Lady Chapel. Photography is not allowed inside.","Hire a pedalo on the Serpentine, visit the Diana memorial fountain and walk on to Kensington Gardens. Sundays bring open-air speakers to Speakers’ Corner.","Cross the Millennium Bridge from St Paul’s and take the lift to the viewing level for city views. Check what is on in the Turbine Hall."]};
+Object.keys(MORE).forEach(function(c){MORE[c].forEach(function(t,i){DB[c][i].m=t})});
+var FACT2={
+France:["It was the world’s tallest man-made structure until the Chrysler Building was finished in 1930.","It is the most visited museum in the world.","Its tall spire was added in the 19th century by the architect Viollet-le-Duc.","Victor Hugo’s body lay in state beneath the arch in 1885.","Its travertine stone releases a chalky substance in the rain, which keeps the basilica bright white.","It opened as a museum in 1986, after the old station was saved from demolition.","The park’s orchard keeps old French apple and pear varieties.","The auditorium chandelier weighs about seven tonnes.","It was among the first garden cemeteries and inspired many others worldwide.","The garden was redesigned in the 1660s by the landscape architect André Le Nôtre."],
+India:["Its red sandstone walls give the fort its name, and it took about ten years to build.","It is built from red Bharatpur stone.","The complex is a UNESCO World Heritage Site.","It is also a UNESCO World Heritage Site, and it is said to have been commissioned by Humayun’s widow.","The architect Fariborz Sahba took inspiration from the lotus, a sacred flower in Indian culture.","The park was originally called Lady Willingdon Park."],
+Italy:["Its Latin name was the Flavian Amphitheatre.","Its stones were reused for centuries as a quarry for other buildings.","The portico has 16 giant granite columns brought from Egypt.","It featured in the 1960 film La Dolce Vita.","The spiral staircase at the exit is a double helix, so people can go up and down without meeting.","The park became public in the early 1900s when the city bought it."],
+Japan:["The temple honours Kannon, the goddess of mercy, said to have been found in the Sumida River by two fishermen.","Its giant torii gates are made of cypress wood.","Its central pillar draws on the design of traditional pagodas to resist earthquakes.","The crossing has appeared in many films and is a symbol of Tokyo.","Japan’s first zoo opened in this park in 1882.","The moat and walls are what remain of Edo Castle, once one of the largest castles in the world."],
+UK:["It has served as a royal palace, a prison, a mint and even a zoo.","It began with about 71,000 objects from the collection of Sir Hans Sloane.","The palace has 775 rooms.","Over 3,000 people are buried or commemorated here.","The Serpentine lake was created in 1730 for Queen Caroline.","The building’s chimney is 99 metres tall."]};
+Object.keys(FACT2).forEach(function(c){FACT2[c].forEach(function(t,i){DB[c][i].f2=t})});
+function visitTip(p){var b=p.o===0?"early morning or late evening":p.cr>=4?"right at opening ("+clk(p.o)+") or in the last hour before closing":p.cr===3?"early morning or late afternoon":"any time of day";return "Best time: "+b+". Allow about "+fmt(p.d)+". Good for: "+p.tags.join(", ")+"."+(p.fee?" Entry costs about "+feeTxt(p)+".":" Entry is free.")}
+// Real coordinates [lat, lon] in the same order as each country's attractions; the map is drawn to scale from them
+var LL={France:[[48.8584,2.2945],[48.8606,2.3376],[48.8530,2.3499],[48.8738,2.2950],[48.8867,2.3431],[48.8600,2.3266],[48.8462,2.3372],[48.8720,2.3316],[48.8614,2.3933],[48.8635,2.3275]],India:[[28.6562,77.2410],[28.6129,77.2295],[28.5245,77.1855],[28.5933,77.2507],[28.5535,77.2588],[28.5931,77.2197]],Italy:[[41.8902,12.4922],[41.8925,12.4853],[41.8986,12.4769],[41.9009,12.4833],[41.9065,12.4536],[41.9142,12.4923]],Japan:[[35.7148,139.7967],[35.6764,139.6993],[35.7101,139.8107],[35.6595,139.7005],[35.7156,139.7745],[35.6852,139.7565]],UK:[[51.5081,-0.0759],[51.5194,-0.1270],[51.5014,-0.1419],[51.4993,-0.1273],[51.5073,-0.1657],[51.5076,-0.0994]]};
+var PROJ={};
+Object.keys(LL).forEach(function(c){
+  var a=LL[c],la=a.map(function(q){return q[0]}),lo=a.map(function(q){return q[1]}),
+  lat0=(Math.min.apply(0,la)+Math.max.apply(0,la))/2,lon0=(Math.min.apply(0,lo)+Math.max.apply(0,lo))/2,ck=Math.cos(lat0*Math.PI/180),
+  mx=a.map(function(q){return (q[1]-lon0)*ck*111320}),my=a.map(function(q){return -(q[0]-lat0)*110540}),
+  rx=Math.max.apply(0,mx)-Math.min.apply(0,mx),ry=Math.max.apply(0,my)-Math.min.apply(0,my),s=Math.min(78/rx,58/ry);
+  PROJ[c]={lat0:lat0,lon0:lon0,ck:ck,s:s,mpu:1/s};
+  DB[c].forEach(function(p,i){p.lat=a[i][0];p.lon=a[i][1];p.x=Math.round((50+mx[i]*s)*10)/10;p.y=Math.round((40+my[i]*s)*10)/10});
+});
+function MU(){return PROJ[st.country].mpu}
+function geoToXY(lat,lon){var r=PROJ[st.country];return {x:50+(lon-r.lon0)*r.ck*111320*r.s,y:40-(lat-r.lat0)*110540*r.s}}
+function hav(a,b,c,d){var r=Math.PI/180,x=(c-a)*r,y=(d-b)*r,h=Math.sin(x/2)*Math.sin(x/2)+Math.cos(a*r)*Math.cos(c*r)*Math.sin(y/2)*Math.sin(y/2);return 12742*Math.asin(Math.sqrt(h))}
+var P=DB.France;
+var TAGS=["history","art","landmark","nature","quiet"];
+var st={country:"France",view:"world",t0:9,start:3,hrs:5,tags:{history:1,art:1,landmark:1,nature:0,quiet:0},skip:{},sel:null,plan:[]};
+var $=function(i){return document.getElementById(i)};
+function travel(a,b){return Math.round(Math.hypot(a.x-b.x,a.y-b.y)*MU()/80)} // minutes between points
+// Module 4: greedy planner — scores attractions by interest match, picks best value per minute that fits the time left
+function clk(m){if(m===1440)return"24:00";var h=Math.floor(m/60)%24,r=Math.round(m%60);return (h<10?"0":"")+h+":"+(r<10?"0":"")+r}
+function feeTxt(p){return p.fee?CUR[st.country]+p.fee.toLocaleString():"Free"}
+function setCountry(c){navStop();st.country=c;P=DB[c];st.start=0;st.skip={};st.sel=null;$("ctry").value=c;fillStart();render()}
+function worldMap(){
+  var g=GEO[st.country],w=64,h=32,vx=Math.min(Math.max(g[0]-w/2,0),200-w),vy=Math.min(Math.max(g[1]-h/2,0),100-h);
+  $("map").setAttribute("viewBox",vx+" "+vy+" "+w+" "+h);
+  var s='<rect x="0" y="0" width="200" height="100" fill="var(--water)"/>';
+  LAND.forEach(function(d){s+='<path d="'+d+'" fill="var(--land)" stroke="var(--card)" stroke-width=".3"/>'});
+  Object.keys(GEO).forEach(function(c){var q=GEO[c],on=c===st.country,l=c==="UK";
+    s+='<g class="wp'+(on?' on':'')+'" data-c="'+c+'"><circle cx="'+q[0]+'" cy="'+q[1]+'" r="'+(on?1:.8)+'"/><text text-anchor="'+(l?'end':'start')+'" x="'+(l?q[0]-1.4:q[0]+1.4)+'" y="'+(q[1]+.5)+'">'+c+' · '+CITY[c]+'</text></g>'});
+  $("map").innerHTML=s;
+  document.querySelectorAll(".wp").forEach(function(e){e.onclick=function(){setCountry(e.dataset.c);st.view="city";render()}});
+}
+// Module 4 planner: respects start time, opening/closing hours, crowd preference and the time budget
+function plan(){
+  var T0=st.t0*60,end=T0+st.hrs*60,now=T0,cur=P[st.start],out=[],used={},cost=0;
+  function score(p){var m=0;p.tags.forEach(function(g){if(st.tags[g])m++});return Math.max(.5,m*3+p.w-(st.tags.quiet?(p.cr-1)*1.5:0))}
+  while(true){
+    var best=null,bv=0,bs=0,bt=0;
+    P.forEach(function(p){
+      if(used[p.id]||st.skip[p.id])return;
+      if(!p.tags.some(function(g){return st.tags[g]})&&p.w<3)return;
+      var tr=travel(cur,p),arr=now+tr,s0=Math.max(arr,p.o);
+      if(s0-arr>60||s0+p.d>p.z||s0+p.d>end)return;
+      var v=score(p)/(s0+p.d-now);if(v>bv){bv=v;best=p;bs=s0;bt=tr}
+    });
+    if(!best)break;
+    out.push({p:best,tr:bt,at:bs,wait:bs-(now+bt)});now=bs+best.d;cur=best;used[best.id]=1;cost+=best.fee;
+  }
+  st.plan=out;return {used:now-T0,left:end-now,cost:cost,fin:now};
+}
+// Module 6: turn-by-turn navigation (simulated on the schematic map)
+var nav={f:0,t:1,mode:"walk",run:false,go:false,d:0,tot:0,pts:[],L:[],ev:[],h:0,last:0};
+var NAVSP={walk:{u:300,m:80},drive:{u:900,m:500}};
+var SEINE="M0 58 C20 62 30 42 48 44 S72 58 100 46 L100 54 C72 66 52 54 48 52 S20 70 0 66Z";
+function mtr(u){var m=Math.round(u*MU()/10)*10;return m>=1000?(m/1000).toFixed(1)+" km":m+" m"}
+function cardinal(dx,dy){return Math.abs(dx)>=Math.abs(dy)?(dx>0?"east":"west"):(dy>0?"south":"north")}
+function leg(a,b){var p=[[a.x,a.y]],ym=a.y;
+  if(Math.abs(a.x-b.x)>=1){var lo=Math.min(a.y,b.y),hi=Math.max(a.y,b.y),mid=(lo+hi)/2,bd=1e9;roadYs().forEach(function(y){if(y>=lo&&y<=hi&&Math.abs(y-mid)<bd){bd=Math.abs(y-mid);ym=y}})}
+  [[a.x,ym],[b.x,ym],[b.x,b.y]].forEach(function(q){var l=p[p.length-1];if(Math.abs(l[0]-q[0])>1e-6||Math.abs(l[1]-q[1])>1e-6)p.push(q)});return p}
+function fillNav(){["nf","nt"].forEach(function(id){$(id).innerHTML="";P.forEach(function(p){var o=document.createElement("option");o.value=p.id;o.textContent=p.n;$(id).appendChild(o)})});nav.f=0;nav.t=Math.min(1,P.length-1);$("nf").value=nav.f;$("nt").value=nav.t;navPrep([P[nav.f],P[nav.t]])}
+function navPrep(list){
+  var pts=[],arr={},i;
+  list.forEach(function(a,j){if(j===0){pts.push([a.x,a.y]);return}leg(list[j-1],a).slice(1).forEach(function(q){pts.push(q)});arr[pts.length-1]=a.n});
+  var L=[0];for(i=1;i<pts.length;i++)L.push(L[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));
+  var ev=[],pd=null;
+  for(i=0;i<pts.length-1;i++){var dx=pts[i+1][0]-pts[i][0],dy=pts[i+1][1]-pts[i][1];if(!dx&&!dy)continue;var tx,ic;
+    if(!pd){tx="Head "+cardinal(dx,dy);ic="⬆️"}else{var cr=pd[0]*dy-pd[1]*dx,dt=pd[0]*dx+pd[1]*dy;
+      if(Math.abs(cr)<1e-6){tx=dt>0?"Continue straight":"Make a U-turn";ic=dt>0?"⬆️":"↩️"}else if(cr>0){tx="Turn right";ic="↱"}else{tx="Turn left";ic="↰"}}
+    ev.push({at:L[i],txt:tx,ic:ic});pd=[dx,dy]}
+  Object.keys(arr).forEach(function(k){ev.push({at:L[k],txt:"Arrive at "+arr[k],ic:+k===pts.length-1?"🏁":"📍",arr:1})});
+  ev.sort(function(a,b){return a.at-b.at||(b.arr?1:0)-(a.arr?1:0)});
+  ev.forEach(function(e,j){e.len=(ev[j+1]?ev[j+1].at:L[L.length-1])-e.at});
+  nav.pts=pts;nav.L=L;nav.tot=L[L.length-1]||0;nav.ev=ev;nav.d=0;
+  $("nsteps").innerHTML=ev.map(function(e){return '<div class="stopitem"><div class="num">'+e.ic+'</div><div class="t"><b>'+e.txt+'</b><div class="meta">'+(e.len>0?mtr(e.len):"")+'</div></div></div>'}).join("");
+}
+function navPos(){var d=nav.d,i=1;while(i<nav.pts.length-1&&nav.L[i]<d)i++;var a=nav.pts[i-1],b=nav.pts[i],s=nav.L[i]-nav.L[i-1],t=s?Math.min(Math.max((d-nav.L[i-1])/s,0),1):0;return {x:a[0]+(b[0]-a[0])*t,y:a[1]+(b[1]-a[1])*t,hd:Math.atan2(b[0]-a[0],-(b[1]-a[1]))*180/Math.PI}}
+function navStop(){if(gps.id!==null){navigator.geolocation.clearWatch(gps.id);gps.id=null}nav.live=false;nav.gps=null;nav.run=false;nav.go=false;nav.d=0;var b=$("ngo");if(b)b.textContent="▶ Start"}
+function navStart(list){
+  navStop();navPrep(list);st.view="nav";
+  if(nav.tot>0){nav.go=true;nav.run=true;nav.h=navPos().hd;nav.last=performance.now();$("ngo").textContent="■ End";requestAnimationFrame(navTick)}
+  render();
+}
+function navTick(ts){
+  if(!nav.run)return;
+  var dt=Math.min((ts-nav.last)/1000,.1);nav.last=ts;nav.d=Math.min(nav.tot,nav.d+NAVSP[nav.mode].u/MU()*dt);
+  if(st.view==="nav")navDraw();else navHud();
+  if(nav.d>=nav.tot){nav.run=false;$("ngo").textContent="▶ Start"}else requestAnimationFrame(navTick);
+}
+function navHud(){
+  var rem=Math.max(nav.tot-nav.d,0),eta=Math.max(1,Math.round(rem*MU()/NAVSP[nav.mode].m)),ev=nav.ev;
+  $("nm1").textContent="🚶 "+Math.max(1,Math.round(nav.tot*MU()/80))+" min";$("nm2").textContent="🚗 "+Math.max(1,Math.round(nav.tot*MU()/500))+" min";$("nsum").innerHTML=nav.tot>0?'<b style="color:var(--tx);font-size:22px">'+eta+' min</b> <span class="meta">('+mtr(rem)+')</span>':"";
+  if(nav.tot<=0){$("nic").textContent="🧭";$("ntx").textContent="Choose two different places";$("nsub").textContent="";return}
+  if(!nav.go){$("nic").textContent="🧭";$("ntx").textContent="Route ready";$("nsub").textContent=mtr(nav.tot)+" · about "+eta+" min "+(nav.mode==="walk"?"walking":"driving");return}
+  var i=0;while(i<ev.length&&ev[i].at<=nav.d+.01)i++;
+  var ch=$("nsteps").children,a=Math.max(i-1,0);
+  for(var j=0;j<ch.length;j++)ch[j].classList.toggle("act",j===a);
+  if(ch[a])$("nsteps").scrollTop=ch[a].offsetTop-ch[0].offsetTop;
+  if(nav.d>=nav.tot-.01){$("nic").textContent="🏁";$("ntx").textContent="You have arrived";$("nsub").textContent=P[nav.t].n;return}
+  var nx=nav.d<.5?ev[0]:ev[i];$("nic").textContent=nx.ic;$("ntx").textContent=nx.txt;
+  $("nsub").textContent=(nx===ev[0]&&nav.d<.5?"for "+mtr(nx.len):"in "+mtr(Math.max(nx.at-nav.d,0)))+" · "+mtr(rem)+" left · "+eta+" min";
+}
+function navDraw(){
+  var A=P[nav.f],go=nav.go,two=nav.pts.length>1,rp=two?navPos():{x:A.x,y:A.y,hd:0},pos=(nav.live&&nav.gps)?{x:nav.gps.x,y:nav.gps.y,hd:rp.hd}:rp,k=go?.4:1,s='';
+  if(go&&(nav.run||nav.live))nav.h+=((rp.hd-nav.h+540)%360-180)*.15;
+  var th=go?nav.h:0;
+  $("map").setAttribute("viewBox",go?"0 0 40 32":"0 0 100 80");
+  s+='<g transform="'+(go?'translate(20 22) rotate('+(-th)+') translate('+(-pos.x)+' '+(-pos.y)+')':'')+'">';
+  s+=streetLayer();
+  if(two){
+    s+='<polyline points="'+nav.pts.map(function(q){return q[0]+","+q[1]}).join(" ")+'" fill="none" stroke="#fff" stroke-width="'+(2.6*k)+'" stroke-linejoin="round" stroke-linecap="round"/><polyline points="'+nav.pts.map(function(q){return q[0]+","+q[1]}).join(" ")+'" fill="none" stroke="#1F1F1F" stroke-width="'+(1.7*k)+'" stroke-linejoin="round" stroke-linecap="round"/>';
+    if(go){var dn=[],i=0;while(i<nav.pts.length&&nav.L[i]<=nav.d){dn.push(nav.pts[i]);i++}dn.push([pos.x,pos.y]);
+      s+='<polyline points="'+dn.map(function(q){return q[0]+","+q[1]}).join(" ")+'" fill="none" stroke="#D0BEA3" stroke-width="'+(1.7*k)+'" stroke-linejoin="round" stroke-linecap="round"/>'}
+  }
+  P.forEach(function(p){var dest=p.id===nav.t;
+    s+='<circle cx="'+p.x+'" cy="'+p.y+'" r="'+(2.4*k)+'" fill="'+(dest?'#1F1F1F':'#8F917C')+'" stroke="#fff" stroke-width="'+(.6*k)+'"/><text transform="rotate('+th+' '+p.x+' '+p.y+')" x="'+(p.x+3.2*k)+'" y="'+(p.y+k)+'" font-size="'+(2.6*k)+'" fill="var(--tx)" stroke="var(--mbg)" stroke-width="'+(.6*k)+'" paint-order="stroke">'+p.n+'</text>'});
+  s+='<g transform="translate('+pos.x+' '+pos.y+') rotate('+pos.hd+') scale('+k+')"><circle r="2.8" fill="#BAC8E0" stroke="#1F1F1F" stroke-width=".7"/><path d="M0 -1.8 L1.3 1.4 L0 .7 L-1.3 1.4Z" fill="#1F1F1F"/></g></g>';
+  $("map").innerHTML=s;navHud();
+}
+// Street-map background: roads run through every attraction so routes follow real-looking streets
+function seedOf(){var s=0;for(var i=0;i<st.country.length;i++)s+=st.country.charCodeAt(i);return s}
+function roadYs(){var sd=seedOf(),r=P.map(function(p){return p.y});for(var y=3;y<80;y+=3.5)r.push(y+(sd%4)*.4);return r}
+function roadXs(){var sd=seedOf(),r=P.map(function(p){return p.x});for(var x=3;x<100;x+=4)r.push(x+(sd%3)*.5);return r}
+var STREET={};
+function streetLayer(){
+  var c=st.country;if(STREET[c])return STREET[c];
+  var sd=seedOf(),prim={},mn=[],pr=[],mj=[],num=function(a,b){return a-b};
+  P.forEach(function(p){prim[p.x]=1;prim["y"+p.y]=1});
+  var mxp=P.map(function(p){return p.x}).sort(num)[Math.floor(P.length/2)],myp=P.map(function(p){return p.y}).sort(num)[Math.floor(P.length/2)];
+  roadXs().forEach(function(x){var g=[x,-10,x,90];if(x===mxp)mj.push(g.concat(1.1));else if(prim[x])pr.push(g.concat(.8));else mn.push(g.concat(.45))});
+  roadYs().forEach(function(y){var g=[-10,y,110,y];if(y===myp)mj.push(g.concat(1.1));else if(prim["y"+y])pr.push(g.concat(.8));else mn.push(g.concat(.45))});
+  mj.push([-10,10+sd%25,110,50+sd%20,1.1],[-10,70-sd%20,110,20+sd%15,1.1]);
+  var s='<rect x="-60" y="-60" width="220" height="200" fill="var(--mbg)"/><path d="'+SEINE+'" transform="translate(0 '+((sd%5-2)*5)+')" fill="var(--mwater)"/>';
+  P.forEach(function(p){if(p.tags.indexOf("nature")>-1)s+='<rect x="'+(p.x-6)+'" y="'+(p.y-5)+'" width="12" height="10" rx="3" fill="var(--mpark)"/>'});
+  var all=mn.concat(pr,mj);
+  all.forEach(function(r){s+='<line x1="'+r[0]+'" y1="'+r[1]+'" x2="'+r[2]+'" y2="'+r[3]+'" stroke="var(--mcase)" stroke-width="'+(r[4]+.35)+'" stroke-linecap="round"/>'});
+  all.forEach(function(r){s+='<line x1="'+r[0]+'" y1="'+r[1]+'" x2="'+r[2]+'" y2="'+r[3]+'" stroke="'+(r[4]>1?'var(--mmaj)':'var(--mroad)')+'" stroke-width="'+r[4]+'" stroke-linecap="round"/>'});
+  return STREET[c]=s;
+}
+// Live GPS: follows the real device position, snaps it to the route, and reroutes if you leave it
+var gps={id:null,rr:0};
+function snap(x,y){var best=1e9,d=0;for(var i=1;i<nav.pts.length;i++){var a=nav.pts[i-1],b=nav.pts[i],vx=b[0]-a[0],vy=b[1]-a[1],l2=vx*vx+vy*vy,t=l2?Math.max(0,Math.min(1,((x-a[0])*vx+(y-a[1])*vy)/l2)):0,e=Math.hypot(x-(a[0]+vx*t),y-(a[1]+vy*t));if(e<best){best=e;d=nav.L[i-1]+t*Math.sqrt(l2)}}return {e:best,d:d}}
+function onFix(p){
+  var c=p.coords,xy=geoToXY(c.latitude,c.longitude),pr=PROJ[st.country];
+  if(!nav.live){
+    var km=hav(pr.lat0,pr.lon0,c.latitude,c.longitude);
+    if(km>40){navStop();$("ngm").textContent="You are about "+Math.round(km)+" km from "+CITY[st.country]+", so live GPS cannot follow you on this map. Use 🎬 Demo for a preview, or try Start when you are in the city.";return}
+    navPrep([{x:xy.x,y:xy.y,n:"Your location"},P[nav.t]]);nav.go=true;nav.live=true;nav.run=false;nav.h=navPos().hd;$("ngo").textContent="■ End";$("ngm").textContent="Live GPS is on. Walk or drive and the map follows you.";
+  }
+  nav.gps={x:xy.x,y:xy.y};
+  var s=snap(xy.x,xy.y);
+  if(s.e*MU()>150&&Date.now()-gps.rr>5000){gps.rr=Date.now();navPrep([{x:xy.x,y:xy.y,n:"Your location"},P[nav.t]]);$("ngm").textContent="Off route. Rerouting…";s={e:0,d:0}}
+  nav.d=s.d;if(nav.tot-nav.d<30/MU())nav.d=nav.tot;
+  if(st.view==="nav")navDraw();else navHud();
+}
+function gpsStart(){
+  if(!navigator.geolocation){$("ngm").textContent="Location is not available in this browser.";return}
+  navStop();gps.rr=0;$("ngm").textContent="Waiting for your location…";$("ngo").textContent="■ End";
+  gps.id=navigator.geolocation.watchPosition(onFix,function(e){navStop();$("ngm").textContent=e.code===1?"Location access was blocked. Allow location for this page, or open the page in its own browser tab.":"Could not get your location. Try again outdoors."},{enableHighAccuracy:true,maximumAge:1000,timeout:20000});
+}
+function planOld(){
+  var left=st.hrs*60,cur=P[st.start],out=[],used={},t=0;
+  function score(p){var m=0;p.tags.forEach(function(g){if(st.tags[g])m++});return m*3+p.w}
+  while(true){
+    var best=null,bv=0;
+    P.forEach(function(p){
+      if(used[p.id]||st.skip[p.id]||p.id===st.start&&false)return;
+      if(!p.tags.some(function(g){return st.tags[g]})&&p.w<3)return;
+      var c=travel(cur,p)+p.d; if(c>left)return;
+      var v=score(p)/c; if(v>bv){bv=v;best=p;best.c=c}
+    });
+    if(!best)break;
+    var tr=travel(cur,best);out.push({p:best,tr:tr,at:t+tr});
+    t+=tr+best.d;left-=tr+best.d;used[best.id]=1;cur=best;
+  }
+  st.plan=out;return {used:t,left:left};
+}
+function fmt(m){var h=Math.floor(m/60),r=m%60;return (h?h+"h ":"")+(r?r+"m":h?"":"0m")}
+function render(){
+  $("hv").textContent=st.hrs+" h";
+  var r=plan(),ids={};st.plan.forEach(function(s,i){ids[s.p.id]=i+1});
+  $("tw").className="chip"+(st.view==="world"?" on":"");$("tc").className="chip"+(st.view==="city"?" on":"");$("tn").className="chip"+(st.view==="nav"?" on":"");$("navp").style.display=st.view==="nav"?"block":"none";
+  if(st.view==="world")worldMap();else if(st.view==="nav")navDraw();else{
+  $("map").setAttribute("viewBox","0 0 100 80");
+  var s=streetLayer();
+  if(st.plan.length){var pts=[P[st.start]].concat(st.plan.map(function(x){return x.p}));
+    s+='<polyline points="'+pts.map(function(p){return p.x+","+p.y}).join(" ")+'" fill="none" stroke="var(--ac)" stroke-width=".8" stroke-dasharray="1.6 1.2"/>';}
+  s+='<circle cx="'+P[st.start].x+'" cy="'+P[st.start].y+'" r="3.6" fill="none" stroke="var(--warn)" stroke-width=".5"/>';
+  P.forEach(function(p){
+    var cls="pin"+(ids[p.id]?" stop":"")+(st.sel===p.id?" sel":"");
+    s+='<g class="'+cls+'" data-id="'+p.id+'"><circle cx="'+p.x+'" cy="'+p.y+'" r="2.4"/>'+
+      (ids[p.id]?'<text class="n" x="'+p.x+'" y="'+(p.y+1)+'">'+ids[p.id]+'</text>':'')+
+      '<text x="'+(p.x+3.2)+'" y="'+(p.y+1)+'">'+p.n+'</text></g>';
+  });
+  $("map").innerHTML=s;
+  document.querySelectorAll(".pin").forEach(function(g){g.onclick=function(){st.sel=+g.dataset.id;render()}});
+  }
+  // Itinerary list
+  $("sum").innerHTML='<div><b>'+st.plan.length+'</b>stops</div><div><b>'+fmt(r.used)+'</b>planned</div><div><b>'+fmt(Math.max(r.left,0))+'</b>spare</div><div><b>'+CUR[st.country]+r.cost.toLocaleString()+'</b>entry fees</div><div><b>'+clk(r.fin)+'</b>finish</div>';
+  var h='';st.plan.forEach(function(x,i){
+    h+='<div class="stopitem"><div class="num">'+(i+1)+'</div><div class="t" data-id="'+x.p.id+'"><b>'+x.p.n+'</b><div class="meta">'+
+    'Travel '+x.tr+' min · 🕒 '+clk(x.at)+'–'+clk(x.at+x.p.d)+' (closes '+clk(x.p.z)+') · '+CROWD[x.p.cr]+' · 🎟️ '+feeTxt(x.p)+(x.wait>0?' · waits '+x.wait+' min for opening':'')+'</div></div><button class="x" title="Skip this stop" aria-label="Skip '+x.p.n+'" data-skip="'+x.p.id+'">×</button></div>';});
+  $("list").innerHTML=h||'<div class="meta">No attractions fit. Add time or pick more interests.</div>';
+  document.querySelectorAll(".t").forEach(function(e){e.onclick=function(){st.sel=+e.dataset.id;render()}});
+  document.querySelectorAll("[data-skip]").forEach(function(b){b.onclick=function(){st.skip[b.dataset.skip]=1;render()}});
+  var sk=Object.keys(st.skip).length;
+  $("note").innerHTML=sk?sk+' skipped · <button class="btn" id="rs">Restore all</button>':'';
+  if(sk)$("rs").onclick=function(){st.skip={};render()};
+  // Module 3: info panel
+  var p=st.sel!==null?P[st.sel]:null;
+  $("info").innerHTML='<h2>Tourist information</h2>'+(p?
+    '<h3>'+p.n+'</h3><div class="meta">'+p.tags.join(" · ")+'</div><div class="facts"><div class="fb" style="background:var(--p1)">🕒 Hours<b>'+clk(p.o)+'–'+clk(p.z)+'</b></div><div class="fb" style="background:var(--p2)">👥 Crowd<b>'+CROWD[p.cr]+'</b></div><div class="fb" style="background:var(--p3)">🎟️ Entry fee<b>'+feeTxt(p)+'</b></div><div class="fb" style="background:var(--p4)">⏱️ Visit time<b>'+fmt(p.d)+'</b></div></div><h4 style="margin:10px 0 2px;font-size:13px;color:var(--mute)">History</h4><p style="margin:0">'+p.h+'</p><h4 style="margin:10px 0 2px;font-size:13px;color:var(--mute)">What to see and tips</h4><p style="margin:0">'+p.m+'</p><h4 style="margin:10px 0 2px;font-size:13px;color:var(--mute)">Plan your visit</h4><p style="margin:0">'+visitTip(p)+'</p><div class="fact"><b>🎉 Fun facts</b><br>• '+p.f+'<br>• '+p.f2+'</div><div class="meta" style="margin-top:8px">Typical hours and prices. Confirm before visiting.</div>'
+    :'<div class="meta">Tap a place on the map or in your itinerary to see its history and a fun fact.</div>');
+}
+// Module 1 wiring
+function fillStart(){fillNav();$("start").innerHTML="";P.forEach(function(p){var o=document.createElement("option");o.value=p.id;o.textContent=p.n;$("start").appendChild(o)});$("start").value=st.start}
+Object.keys(DB).forEach(function(c){var o=document.createElement("option");o.value=c;o.textContent=c+" ("+CITY[c]+")";$("ctry").appendChild(o)});
+$("ctry").value=st.country;
+$("ctry").onchange=function(){setCountry(this.value)};
+for(var hh=6;hh<=14;hh++){var oo=document.createElement("option");oo.value=hh;oo.textContent=(hh<10?"0":"")+hh+":00";$("t0").appendChild(oo)}
+$("t0").value=st.t0;$("t0").onchange=function(){st.t0=+this.value;render()};
+$("tw").onclick=function(){st.view="world";render()};
+$("tn").onclick=function(){st.view="nav";render()};
+$("ndemo").onclick=function(){navStart([P[nav.f],P[nav.t]])};
+$("nf").onchange=function(){navStop();nav.f=+this.value;navPrep([P[nav.f],P[nav.t]]);render()};
+$("nt").onchange=function(){navStop();nav.t=+this.value;navPrep([P[nav.f],P[nav.t]]);render()};
+$("nm1").onclick=function(){nav.mode="walk";$("nm1").classList.add("on");$("nm2").classList.remove("on");navHud()};
+$("nm2").onclick=function(){nav.mode="drive";$("nm2").classList.add("on");$("nm1").classList.remove("on");navHud()};
+$("ngo").onclick=function(){if(nav.run||gps.id!==null){navStop();navPrep([P[nav.f],P[nav.t]]);render()}else gpsStart()};
+$("nall").onclick=function(){var l=[P[st.start]];st.plan.forEach(function(x){if(l[l.length-1].id!==x.p.id)l.push(x.p)});if(l.length<2){$("ntx").textContent="Your plan has no stops to navigate";return}nav.f=l[0].id;nav.t=l[l.length-1].id;$("nf").value=nav.f;$("nt").value=nav.t;navStart(l)};$("tc").onclick=function(){st.view="city";render()};
+fillStart();
+$("start").onchange=function(){st.start=+this.value;render()};
+$("hrs").oninput=function(){st.hrs=+this.value;render()};
+TAGS.forEach(function(g){var b=document.createElement("button");b.className="chip"+(st.tags[g]?" on":"");b.textContent=g==="quiet"?"Avoid crowds":g[0].toUpperCase()+g.slice(1);
+  b.onclick=function(){st.tags[g]=st.tags[g]?0:1;b.classList.toggle("on");render()};$("chips").appendChild(b)});
+render();
+</script>
+</body>
+</html>
